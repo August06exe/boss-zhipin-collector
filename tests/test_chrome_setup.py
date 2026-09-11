@@ -1170,6 +1170,33 @@ class ChromeSetupTests(unittest.TestCase):
                 r"C:\Users\leon\AppData\Local\Google\Chrome\User Data",
             )
 
+    def test_windows_default_paths_support_edge(self):
+        module = load_module()
+        env = {
+            "LOCALAPPDATA": r"C:\Users\leon\AppData\Local",
+            "PROGRAMFILES": r"C:\Program Files",
+            "PROGRAMFILES(X86)": r"C:\Program Files (x86)",
+        }
+        expected_edge = r"C:\Users\leon\AppData\Local\Microsoft\Edge\Application\msedge.exe"
+        with mock.patch.object(module.platform, "system", return_value="Windows"), \
+                mock.patch.dict(module.os.environ, env, clear=False), \
+                mock.patch.object(module.os.path, "exists", side_effect=lambda p: p == expected_edge):
+            self.assertEqual(module.get_default_edge_path(), expected_edge)
+            self.assertEqual(
+                module.get_default_profile_dir("edge"),
+                r"C:\Users\leon\AppData\Local\Microsoft\Edge\User Data",
+            )
+
+    def test_browser_process_predicate_distinguishes_chrome_and_edge(self):
+        module = load_module()
+        edge_command = r'"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --user-data-dir=C:\edge-profile'
+        chrome_command = r'"C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir=C:\chrome-profile'
+
+        self.assertTrue(module.is_supported_browser_command(edge_command, "edge"))
+        self.assertFalse(module.is_supported_browser_command(edge_command, "chrome"))
+        self.assertTrue(module.is_supported_browser_command(chrome_command, "chrome"))
+        self.assertTrue(module.is_supported_browser_command(edge_command))
+
     def test_macos_defaults_to_chromium_when_google_chrome_is_missing(self):
         module = load_module()
         chromium_path = "/Applications/Chromium.app/Contents/MacOS/Chromium"
@@ -1340,6 +1367,7 @@ class ChromeSetupTests(unittest.TestCase):
             expected_profile_arg = f"--user-data-dir={paths['cdp_profile']}"
             with mock.patch.object(module, "DEFAULT_PROFILE_DIR", str(paths["source_profile"])), \
                     mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
                     mock.patch.object(module, "requests", fake_requests), \
                     mock.patch.object(module.shutil, "copy2", side_effect=lambda src, dst: calls["copy2"].append((src, dst))), \
                     mock.patch.object(module.subprocess, "run", side_effect=lambda *args, **kwargs: fake_run(calls, *args, **kwargs)), \
@@ -1355,6 +1383,39 @@ class ChromeSetupTests(unittest.TestCase):
         launched = calls["popen"][0]
         self.assertIn(expected_profile_arg, launched)
         wait_login.assert_called_once_with(9333, timeout=module.DEFAULT_LOGIN_TIMEOUT)
+
+    def test_setup_edge_uses_edge_executable_and_profile_source(self):
+        module = load_module()
+        calls = {"run": [], "popen": []}
+        fake_requests = mock.Mock()
+        responses = iter([
+            Exception("not ready"),
+            type("Resp", (), {"status_code": 200})(),
+        ])
+
+        def fake_get(*args, **kwargs):
+            response = next(responses)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        with tempfile_profile() as paths:
+            expected_profile_arg = f"--user-data-dir={paths['cdp_profile']}"
+            with mock.patch.object(module, "DEFAULT_EDGE_PATH", r"C:\Edge\msedge.exe"), \
+                    mock.patch.object(module, "DEFAULT_EDGE_PROFILE_DIR", str(paths["source_profile"])), \
+                    mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
+                    mock.patch.object(module, "requests", fake_requests), \
+                    mock.patch.object(module.subprocess, "run", side_effect=lambda *args, **kwargs: fake_run(calls, *args, **kwargs)), \
+                    mock.patch.object(module.subprocess, "Popen", side_effect=lambda cmd, **kwargs: calls["popen"].append(cmd)), \
+                    mock.patch.object(module.time, "sleep", return_value=None), \
+                    mock.patch.object(module, "wait_for_login", return_value=True):
+                fake_requests.get.side_effect = fake_get
+                self.assertEqual(module.run_setup_chrome(cdp_port=9333, browser="edge"), 0)
+
+        launched = calls["popen"][0]
+        self.assertEqual(launched[0], r"C:\Edge\msedge.exe")
+        self.assertIn(expected_profile_arg, launched)
 
     def test_copy_login_state_is_explicit_and_does_not_copy_password_databases(self):
         module = load_module()
@@ -1385,6 +1446,7 @@ class ChromeSetupTests(unittest.TestCase):
                 (123, chrome_cmdline(9333, "/tmp/chrome-cdp-data")),
             ])
             with mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
                     mock.patch.object(module, "requests", fake_requests), \
                     mock.patch.object(module.subprocess, "run", return_value=type("Completed", (), {"stdout": ps_output, "returncode": 0})()), \
                     mock.patch.object(module.subprocess, "Popen") as popen:
@@ -1402,6 +1464,7 @@ class ChromeSetupTests(unittest.TestCase):
                 (123, chrome_cmdline(9333, str(paths["cdp_profile"]))),
             ])
             with mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
                     mock.patch.object(module, "requests", fake_requests), \
                     mock.patch.object(module.subprocess, "run", return_value=type("Completed", (), {"stdout": ps_output, "returncode": 0})()), \
                     mock.patch.object(module.subprocess, "Popen") as popen, \
@@ -1421,6 +1484,7 @@ class ChromeSetupTests(unittest.TestCase):
                 (123, chrome_cmdline(9333, str(paths["cdp_profile"]))),
             ])
             with mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
                     mock.patch.object(module, "requests", fake_requests), \
                     mock.patch.object(module.subprocess, "run", return_value=type("Completed", (), {"stdout": ps_output, "returncode": 0})()), \
                     mock.patch.object(module, "wait_for_login") as wait_login:
@@ -1440,6 +1504,90 @@ class ChromeSetupTests(unittest.TestCase):
                 self.assertEqual(module.chrome_pids_for_user_data_dir(str(paths["cdp_profile"])), [123])
                 self.assertEqual(module.chrome_user_data_dirs_for_cdp_port(9333), [str(paths["cdp_profile"])])
                 self.assertTrue(module.cdp_port_uses_profile(9333, str(paths["cdp_profile"])))
+
+    def test_windows_process_query_filters_server_side(self):
+        """Windows 进程发现必须用 WQL -Filter 服务器端过滤。
+
+        全量 Win32_Process 枚举在繁忙主机上会超过 timeout，超时被吞成空列表后
+        会误判「浏览器未运行/端口被占用」（回归保护，#41 review fix）。
+        """
+        module = load_module()
+        captured = {}
+
+        def fake_run(cmd, **kwargs):
+            captured["cmd"] = " ".join(cmd)
+            return type("Completed", (), {"stdout": "", "returncode": 0})()
+
+        with mock.patch.object(module.platform, "system", return_value="Windows"), \
+                mock.patch.object(module.subprocess, "run", side_effect=fake_run):
+            self.assertEqual(module.iter_browser_process_commands(), [])
+
+        self.assertIn("-Filter", captured["cmd"])
+        self.assertIn("chrome.exe", captured["cmd"])
+        self.assertIn("msedge.exe", captured["cmd"])
+        self.assertNotIn("Where-Object", captured["cmd"])
+
+    def test_windows_non_json_process_output_returns_empty(self):
+        """Windows 分支对非 JSON 输出必须 fail-safe 返回空，不得把垃圾行当成进程。"""
+        module = load_module()
+
+        with mock.patch.object(module.platform, "system", return_value="Windows"), \
+                mock.patch.object(module.subprocess, "run",
+                                  return_value=type("Completed", (), {"stdout": "ERROR: access denied", "returncode": 1})()):
+            self.assertEqual(module.iter_browser_process_commands(), [])
+
+    def test_setup_edge_fails_gracefully_when_edge_missing(self):
+        """未安装 Edge 时 --setup-edge 应友好报错，而不是裸 FileNotFoundError。"""
+        module = load_module()
+
+        with mock.patch.object(module, "browser_executable_exists", return_value=False), \
+                mock.patch.object(module.subprocess, "Popen") as popen:
+            self.assertEqual(module.run_setup_chrome(cdp_port=9333, browser="edge"), 1)
+
+        popen.assert_not_called()
+
+    def test_setup_edge_rejects_ready_cdp_port_served_by_chrome(self):
+        """隔离 profile 已由 Chrome 服务时，--setup-edge 必须报错而不是静默复用。"""
+        module = load_module()
+        fake_requests = mock.Mock()
+        fake_requests.get.return_value = type("Resp", (), {"status_code": 200})()
+
+        with tempfile_profile() as paths:
+            ps_output = process_query_stdout([
+                (123, chrome_cmdline(9333, str(paths["cdp_profile"]))),
+            ])
+            with mock.patch.object(module, "DEFAULT_CDP_DATA_DIR", str(paths["cdp_profile"])), \
+                    mock.patch.object(module, "browser_executable_exists", return_value=True), \
+                    mock.patch.object(module, "requests", fake_requests), \
+                    mock.patch.object(module.subprocess, "run", return_value=type("Completed", (), {"stdout": ps_output, "returncode": 0})()), \
+                    mock.patch.object(module.subprocess, "Popen") as popen:
+                self.assertEqual(module.run_setup_chrome(cdp_port=9333, browser="edge"), 1)
+
+        popen.assert_not_called()
+
+    def test_resolve_setup_browser_prefers_explicit_setup_flag(self):
+        """--setup-edge 优先；显式冲突（--setup-edge --browser chrome）返回告警。"""
+        module = load_module()
+
+        # --setup-edge 固定 Edge；与 --browser chrome 显式冲突时给出告警
+        browser, warning = module.resolve_setup_browser(False, True, "chrome")
+        self.assertEqual(browser, "edge")
+        self.assertIsNotNone(warning)
+
+        # --setup-edge 不带 --browser：无告警
+        browser, warning = module.resolve_setup_browser(False, True, None)
+        self.assertEqual(browser, "edge")
+        self.assertIsNone(warning)
+
+        # --setup-chrome --browser edge 是文档化的兼容用法，保持原行为且无告警
+        browser, warning = module.resolve_setup_browser(True, False, "edge")
+        self.assertEqual(browser, "chrome")
+        self.assertIsNone(warning)
+
+        # --setup-chrome 默认 Chrome
+        browser, warning = module.resolve_setup_browser(True, False, None)
+        self.assertEqual(browser, "chrome")
+        self.assertIsNone(warning)
 
     def test_stop_cdp_chrome_terminates_only_matching_profile(self):
         module = load_module()
@@ -1537,6 +1685,8 @@ class ChromeSetupTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0)
         self.assertIn("--setup-chrome", result.stdout)
+        self.assertIn("--setup-edge", result.stdout)
+        self.assertIn("--browser", result.stdout)
         self.assertIn("--reset-chrome-profile", result.stdout)
         self.assertIn("--no-wait-login", result.stdout)
         self.assertIn("--login-timeout", result.stdout)
