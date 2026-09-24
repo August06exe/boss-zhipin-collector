@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" font-family="-apple-system,'Segoe UI','Helvetica Neue',Arial,'Microsoft YaHei',sans-serif">
+  <!-- 瑞士风：三个老问题，三个解法（面向求职者，不谈技术） -->
+  <rect width="960" height="400" fill="#FFFFFF"/>
+  <g stroke="rgba(17,17,17,0.05)" stroke-width="1">
+    <path d="M0 50H960M0 100H960M0 150H960M0 200H960M0 250H960M0 300H960M0 350H960"/>
+    <path d="M120 0V400M240 0V400M360 0V400M480 0V400M600 0V400M720 0V400M840 0V400"/>
+  </g>
+
+  <rect x="48" y="34" width="14" height="14" fill="#FF4D00"/>
+  <text x="72" y="46" font-size="17" font-weight="800" fill="#111111">找工作的三个老麻烦，它全包了</text>
+
+  <!-- 列 1 -->
+  <text x="48" y="110" font-size="12" font-weight="800" letter-spacing="2" fill="rgba(17,17,17,0.45)">老麻烦</text>
+  <rect x="48" y="124" width="260" height="110" fill="#FFFFFF" stroke="rgba(17,17,17,0.35)" stroke-width="1.5"/>
+  <text x="66" y="156" font-size="14.5" font-weight="800" fill="#111111">网页上的薪资是乱码</text>
+  <text x="66" y="180" font-size="12.5" fill="rgba(17,17,17,0.62)">复制出来全是奇怪的字符，</text>
+  <text x="66" y="200" font-size="12.5" fill="rgba(17,17,17,0.62)">只能一个个截图存着</text>
+
+  <rect x="48" y="252" width="260" height="110" fill="#111111"/>
+  <text x="66" y="284" font-size="14.5" font-weight="800" fill="#FF4D00">抓到的薪资直接能看</text>
+  <text x="66" y="308" font-size="12.5" fill="rgba(255,255,255,0.78)">Excel 双击打开就是</text>
+  <text x="66" y="328" font-size="12.5" fill="rgba(255,255,255,0.78)">"25-45K·16薪" 这样的明文</text>
+
+  <!-- 列 2 -->
+  <text x="350" y="110" font-size="12" font-weight="800" letter-spacing="2" fill="rgba(17,17,17,0.45)">老麻烦</text>
+  <rect x="350" y="124" width="260" height="110" fill="#FFFFFF" stroke="rgba(17,17,17,0.35)" stroke-width="1.5"/>
+  <text x="368" y="156" font-size="14.5" font-weight="800" fill="#111111">整理 30 个岗位要半小时</text>
+  <text x="368" y="180" font-size="12.5" fill="rgba(17,17,17,0.62)">复制、粘贴、排格式，</text>
+  <text x="368" y="200" font-size="12.5" fill="rgba(17,17,17,0.62)">弄完眼睛都花了</text>
+
+  <rect x="350" y="252" width="260" height="110" fill="#111111"/>
+  <text x="368" y="284" font-size="14.5" font-weight="800" fill="#FF4D00">填个表点开始，去干别的</text>
+  <text x="368" y="308" font-size="12.5" fill="rgba(255,255,255,0.78)">抓够 300 条或到时间自动停，</text>
+  <text x="368" y="328" font-size="12.5" fill="rgba(255,255,255,0.78)">文件随时打开都是最新的</text>
+
+  <!-- 列 3 -->
+  <text x="652" y="110" font-size="12" font-weight="800" letter-spacing="2" fill="rgba(17,17,17,0.45)">老麻烦</text>
+  <rect x="652" y="124" width="260" height="110" fill="#FFFFFF" stroke="rgba(17,17,17,0.35)" stroke-width="1.5"/>
+  <text x="670" y="156" font-size="14.5" font-weight="800" fill="#111111">爬虫工具不会装</text>
+  <text x="670" y="180" font-size="12.5" fill="rgba(17,17,17,0.62)">要装环境、敲命令、看报错，</text>
+  <text x="670" y="200" font-size="12.5" fill="rgba(17,17,17,0.62)">每一步都劝退</text>
+
+  <rect x="652" y="252" width="260" height="110" fill="#111111"/>
+  <text x="670" y="284" font-size="14.5" font-weight="800" fill="#FF4D00">解压双击就能用</text>
+  <text x="670" y="308" font-size="12.5" fill="rgba(255,255,255,0.78)">第一次扫码登录 BOSS直聘，</text>
+  <text x="670" y="328" font-size="12.5" fill="rgba(255,255,255,0.78)">之后全程点鼠标</text>
+
+  <!-- 列间隔发丝线 -->
+  <line x1="324" y1="124" x2="324" y2="362" stroke="rgba(17,17,17,0.14)" stroke-width="1"/>
+  <line x1="626" y1="124" x2="626" y2="362" stroke="rgba(17,17,17,0.14)" stroke-width="1"/>
+
+  <!-- 底部一句合规 -->
+  <rect x="48" y="374" width="12" height="12" fill="none" stroke="#FF4D00" stroke-width="2"/>
+  <text x="70" y="384" font-size="12" fill="rgba(17,17,17,0.55)">只抓你自己账号看得到的页面：单次最多 300 条、自动随机放慢、有风险就停下提醒你</text>
+</svg>

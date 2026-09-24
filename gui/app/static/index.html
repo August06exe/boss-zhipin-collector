@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="favicon.ico">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS职位采集器</title>
+<link rel="stylesheet" href="style.css?v=m8">
+</head>
+<body>
+<!-- 会话失效兜底：令牌过期时盖住半残界面，给出明确出路 -->
+<div id="session-dead" class="session-dead" hidden>
+  <div class="session-dead-box">
+    <div class="brand">BOSS职位采集器</div>
+    <h2>界面会话已失效</h2>
+    <p>为了数据安全，本界面每次运行都需要从启动器重新打开。</p>
+    <p>请关闭这个标签页，重新双击「启动职位采集器」。</p>
+  </div>
+</div>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">BOSS职位采集器<span class="brand-en">JOB&nbsp;COLLECTOR</span></div>
+    <div class="top-actions">
+      <span id="state-badge" class="statebadge" data-state="idle">待机</span>
+      <a href="manual.html?v=m8" target="_blank" class="btn ghost sm">使用说明</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- 表单区 -->
+    <div id="screen-form">
+      <section class="block">
+        <div class="block-head"><span class="no">01</span><h2>搜索条件</h2></div>
+        <div class="block-body">
+          <div class="frow">
+            <label class="flabel" for="keyword">关键词</label>
+            <div class="fctl">
+              <input type="text" id="keyword" placeholder="如：AI Agent">
+            </div>
+          </div>
+          <div class="frow">
+            <label class="flabel" for="city-search">城市</label>
+            <div class="fctl">
+              <div class="chips" id="hot-cities"></div>
+              <input type="text" id="city-search" class="city-search" placeholder="输入城市名搜索（支持全国 300+ 城市）" autocomplete="off">
+              <div id="city-list" class="city-list" hidden></div>
+              <div class="selected-tag" id="city-selected" hidden>
+                已选<span id="city-tag" class="tag-solid"></span>
+                <button id="clear-city" class="btn ghost sm" type="button">重选</button>
+              </div>
+            </div>
+          </div>
+          <div class="frow">
+            <span class="flabel">筛选条件</span>
+            <div class="fctl">
+              <div class="selects">
+                <div class="sel"><span class="sel-label">薪资要求</span><select id="salary" aria-label="薪资要求"></select></div>
+                <div class="sel"><span class="sel-label">工作经验</span><select id="experience" aria-label="工作经验"></select></div>
+                <div class="sel"><span class="sel-label">学历要求</span><select id="degree" aria-label="学历要求"></select></div>
+                <div class="sel"><span class="sel-label">公司规模</span><select id="scale" aria-label="公司规模"></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head"><span class="no">02</span><h2>采集量</h2></div>
+        <div class="block-body">
+          <div class="frow">
+            <label class="flabel" for="target-count">目标条数</label>
+            <div class="fctl">
+              <input type="number" id="target-count" min="10" max="300" value="300">
+              <p class="hint">10-300 条，抓够自动停（每页 30 条）</p>
+            </div>
+          </div>
+          <div class="frow">
+            <label class="flabel" for="max-minutes">最长运行</label>
+            <div class="fctl">
+              <input type="number" id="max-minutes" min="1" max="600" value="300">
+              <p class="hint">分钟。到点自动停并保留已抓数据</p>
+            </div>
+          </div>
+          <p id="scope-preview" class="note"></p>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head"><span class="no">03</span><h2>导出字段</h2></div>
+        <div class="block-body">
+          <div id="fields-box" class="fields-grid"></div>
+          <p class="hint">不勾选的列不会出现在结果文件里</p>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head"><span class="no">04</span><h2>保存位置</h2></div>
+        <div class="block-body">
+          <div class="frow">
+            <label class="flabel" for="data-dir">文件夹</label>
+            <div class="fctl">
+              <div class="dirline">
+                <input type="text" id="data-dir" placeholder="默认为系统下载文件夹，也可以手动输入或点右侧按钮选择">
+                <button id="choose-dir" class="btn ghost" type="button">选择文件夹</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button id="start" class="btn primary" type="button">开始采集</button>
+        <p id="form-error" class="error"></p>
+      </div>
+      <div class="sub-actions">
+        <button id="cleanup-browser" class="btn ghost sm" type="button">采集没反应？点此强制关闭上次没退出的采集浏览器</button>
+      </div>
+    </div>
+
+    <!-- 登录向导 -->
+    <div id="screen-login" hidden>
+      <section class="block">
+        <div class="block-head"><span class="no">!</span><h2>需要登录 BOSS直聘</h2></div>
+        <div class="block-body">
+          <ol class="steps">
+            <li>点下方「启动专用浏览器」，会弹出独立的浏览器并自动打开登录页</li>
+            <li>在里面扫码或用手机号登录（可以慢慢扫，程序最长等 5 分钟）</li>
+            <li>登录成功会自动继续；超过 5 分钟再点「我登录好了」补一次确认</li>
+          </ol>
+        </div>
+      </section>
+      <p id="login-status" class="note" hidden></p>
+      <div class="actions">
+        <button id="open-browser" class="btn primary" type="button">启动专用浏览器</button>
+        <button id="login-done" class="btn outline" type="button">我登录好了</button>
+        <p id="login-error" class="error"></p>
+      </div>
+    </div>
+
+    <!-- 运行状态：单页结构，固定在页面底部 -->
+    <section id="screen-run" class="block run-block" hidden>
+      <div class="block-head"><span class="no">05</span><h2>运行状态</h2></div>
+      <div class="block-body">
+        <div class="stats">
+          <div class="stat acc"><b id="run-total">0</b><span>已采集（条）</span></div>
+          <div class="stat"><b id="run-new">0</b><span>本轮新增</span></div>
+          <div class="stat"><b id="run-target">-</b><span>目标（条）</span></div>
+          <div class="stat"><b id="run-round">0</b><span>轮次</span></div>
+        </div>
+        <div class="progress">
+          <div class="progress-track"><div class="progress-fill" id="run-progress-fill"></div></div>
+          <span class="progress-pct" id="run-progress-pct">0%</span>
+        </div>
+        <p id="run-details" class="note" hidden></p>
+        <div class="frow">
+          <span class="flabel">正在采集</span>
+          <div class="fctl current" id="run-current">-</div>
+        </div>
+        <div class="frow">
+          <span class="flabel">采集日志</span>
+          <div class="fctl">
+            <div id="logs" class="logs"></div>
+            <div id="logs-full" class="logs full" hidden></div>
+            <p class="hint"><button id="log-toggle" class="textlink" type="button">展开完整日志</button></p>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="stop" class="btn dark" type="button">结束采集</button>
+        <p id="run-done" class="done"></p>
+      </div>
+    </section>
+
+    <!-- 浏览器缺失引导 -->
+    <div id="browser-missing" hidden>
+      <section class="block">
+        <div class="block-head"><span class="no">!</span><h2>电脑上需要安装 Chrome 或 Edge</h2></div>
+        <div class="block-body">
+          <p class="body-text">采集由一个独立的专用浏览器完成（不是你现在看界面的这个）。程序检查了你电脑，Google Chrome 和 Microsoft Edge 都没有安装。请先安装任意一款，装好后回来重新点「开始采集」。</p>
+          <p><a href="https://www.google.com/chrome/" target="_blank" rel="noopener" class="textlink">打开 Chrome 官网下载页 →</a></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>仅供个人求职研究 · 请遵守 BOSS直聘用户协议</span>
+    <span>BOSS职位采集器</span>
+  </footer>
+</div>
+<script src="app.js?v=m8"></script>
+</body>
+</html>

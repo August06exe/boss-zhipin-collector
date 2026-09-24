@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "BOSS直聘爬虫是怎么工作的",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1100, 448],
+    "views": [
+      { "id": "setup", "label": "第 1 步 · 准备", "focus": ["user", "scraper", "browser"], "note": "先装依赖，再运行 --setup-chrome 启动 BOSS 专用浏览器，在弹出的窗口里手动登录 zhipin.com 一次，登录态长期保留。" },
+      { "id": "listen", "label": "第 2 步 · 抓取", "focus": ["scraper", "cdp", "browser", "zhipin"], "note": "脚本通过 CDP 遥控浏览器打开搜索页并滚动翻页，只旁听页面自己发出的搜索 API 响应，salaryDesc 明文薪资直接到手。" },
+      { "id": "save", "label": "第 3 步 · 落地", "focus": ["scraper", "results"], "note": "每页抓完立即写入 JSON / CSV 并按 job_id 去重，中断不丢数据；城市名由内置 300+ 城市码表自动翻译。" },
+      { "id": "report", "label": "第 4 步 · 分析", "focus": ["results", "summary", "user"], "note": "job_summary.py 汇总薪资分布、经验学历要求和高频技能，生成一段可直接复制的求职材料优化提示词。" }
+    ]
+  },
+  "components": [
+    { "id": "user", "type": "external", "label": "你", "sublabel": "求职者 · 敲命令", "pos": [16, 32], "size": [120, 76] },
+    { "id": "scraper", "type": "backend", "label": "boss_cdp_raw.py", "sublabel": "抓取主脚本 · 工具的大脑", "pos": [246, 28], "size": [190, 84] },
+    { "id": "cdp", "type": "messagebus", "label": "CDP 远程调试通道", "sublabel": "Chrome DevTools Protocol · 9222 端口", "pos": [566, 32], "size": [190, 76] },
+    { "id": "browser", "type": "frontend", "label": "BOSS 专用 Chrome", "sublabel": "隔离 profile · 手动登录一次", "pos": [886, 28], "size": [190, 84] },
+    { "id": "results", "type": "database", "label": "职位数据 JSON / CSV", "sublabel": "~/.boss-zhipin-scraper/job-result/", "pos": [246, 300], "size": [190, 84] },
+    { "id": "summary", "type": "backend", "label": "job_summary.py", "sublabel": "聚合分析 + 求职提示词", "pos": [566, 300], "size": [190, 84] },
+    { "id": "zhipin", "type": "external", "label": "BOSS直聘 zhipin.com", "sublabel": "目标网站 · 搜索 API 数据源", "pos": [886, 304], "size": [190, 76] }
+  ],
+  "connections": [
+    { "id": "user-runs", "from": "user", "to": "scraper", "label": "运行抓取命令" },
+    { "id": "script-commands", "from": "scraper", "to": "cdp", "label": "① 遥控浏览器翻页", "variant": "emphasis", "labelAt": [501, 98] },
+    { "id": "cdp-listens-back", "from": "cdp", "to": "scraper", "label": "⑥ 旁听到明文数据", "variant": "emphasis", "labelAt": [501, 42] },
+    { "id": "cdp-executes", "from": "cdp", "to": "browser", "label": "② 下发调试指令", "variant": "emphasis", "labelAt": [821, 98] },
+    { "id": "browser-reports", "from": "browser", "to": "cdp", "label": "⑤ 页面流量上报", "labelAt": [821, 42] },
+    { "id": "browser-visits", "from": "browser", "to": "zhipin", "label": "③ 真实登录态访问", "variant": "emphasis", "labelAt": [1054, 185] },
+    { "id": "zhipin-responds", "from": "zhipin", "to": "browser", "label": "④ API 返回明文薪资", "labelAt": [896, 230] },
+    { "id": "script-writes", "from": "scraper", "to": "results", "label": "每页写盘，自动去重", "labelAt": [341, 206] },
+    { "id": "results-feed-summary", "from": "results", "to": "summary", "label": "读取最新结果" },
+    { "id": "summary-to-user", "from": "summary", "to": "user", "label": "汇总报告与求职提示词", "fromSide": "bottom", "toSide": "bottom", "labelAt": [353, 424] }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "核心机制：只旁听，不出手", "items": ["脚本从不伪造请求：BOSS 的网页自己调用搜索 API", "脚本只通过 CDP 旁听响应，复用真实浏览器指纹，不易触发风控", "这也是它不用 Selenium / Playwright 的原因"] },
+    { "dot": "emerald", "title": "薪资为什么是明文", "items": ["网页上展示的薪资被字体加密，直接抄页面会拿到乱码", "搜索 API 返回的 salaryDesc 字段本身就是明文，如「30-60K·15薪」", "默认禁止 DOM 降级提取，防止把不可信薪资写进结果"] },
+    { "dot": "amber", "title": "安全边界与抓取节奏", "items": ["专用 Chrome 使用隔离 profile，不碰你的主浏览器与账号", "翻页随机等待 12-22 秒，单次最多 10 页 300 条", "每页抓完立即写盘并按 job_id 去重，中断不丢数据"] }
+  ]
+}

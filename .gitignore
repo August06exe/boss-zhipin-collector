@@ -29,7 +29,6 @@ htmlcov/
 .nox/
 
 # Project-generated local files
-docs/
 
 # Local skill tooling config (baoyu-image-gen etc.)
 .baoyu-skills/
@@ -44,4 +43,12 @@ Thumbs.db
 # 覆盖全局 gitignore 对 AGENTS.md 的忽略，本项目需要提交
 !AGENTS.md
 
-./zcode
+
+# Local agent workspace
+.superpowers/
+.zcodeignore
+
+# Agent harness local files
+.zcode/
+
+**/runtime.json

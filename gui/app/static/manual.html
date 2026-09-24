@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="favicon.ico">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS职位采集器 · 使用说明</title>
+<style>
+:root { --fg:#111111; --acc:#FF4D00; --hair:rgba(17,17,17,.14); --faint:rgba(17,17,17,.45); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,"Segoe UI","Helvetica Neue",Arial,"Microsoft YaHei","PingFang SC",sans-serif;
+  color:var(--fg); line-height:1.8; background:#fff; position:relative; }
+body::before { content:""; position:fixed; inset:0;
+  background:linear-gradient(90deg,rgba(17,17,17,.045) 1px,transparent 1px),linear-gradient(0deg,rgba(17,17,17,.045) 1px,transparent 1px);
+  background-size:48px 48px; pointer-events:none; }
+.wrap { position:relative; max-width:760px; margin:0 auto; padding:40px 28px 56px; }
+.brand { display:flex; align-items:center; gap:10px; font-size:15px; font-weight:800; margin-bottom:6px; }
+.brand::before { content:""; width:11px; height:11px; background:var(--acc); }
+h1 { font-size:26px; font-weight:800; letter-spacing:.01em; margin:8px 0 4px; }
+.sub { font-size:12px; font-weight:600; letter-spacing:.2em; color:var(--faint); margin-bottom:22px; }
+h2 { font-size:17px; font-weight:800; border-top:1px solid var(--fg); padding:20px 0 14px; margin-top:34px; }
+h2 .no { color:var(--acc); font-size:12px; font-weight:800; letter-spacing:.1em; margin-right:10px; }
+p { font-size:14px; margin:8px 0; }
+.step { border:1px solid var(--hair); padding:10px 14px; margin:8px 0; font-size:13.5px; }
+.step b { color:var(--acc); margin-right:6px; }
+.warn { border:1px solid var(--fg); border-left:3px solid var(--acc); padding:12px 14px; margin:10px 0; font-size:13.5px; }
+code { background:rgba(17,17,17,.06); padding:1px 6px; font-family:ui-monospace,Consolas,monospace; font-size:12.5px; }
+a { color:var(--acc); font-weight:700; text-decoration:none; border-bottom:1px solid var(--acc); }
+.foot { margin-top:44px; border-top:1px solid var(--fg); padding-top:14px; font-size:12px; color:var(--faint); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">BOSS职位采集器</div>
+  <h1>使用说明</h1>
+  <div class="sub">MANUAL · 五分钟上手</div>
+
+  <h2><span class="no">01</span>五分钟上手</h2>
+  <div class="step"><b>1</b>把整个文件夹解压到任意位置（建议桌面，别放 C 盘 Program Files）</div>
+  <div class="step"><b>2</b>双击「启动职位采集器」，界面会在浏览器里自动打开</div>
+  <div class="step"><b>3</b>第一次使用会引导你登录 BOSS直聘：点「启动专用浏览器」，在弹出的浏览器里扫码登录，然后回到界面点「我登录好了」。登录一次长期有效</div>
+  <div class="step"><b>4</b>回到首页，填好关键词、选好城市，点「开始采集」。抓够目标条数或到达最长运行时间会自动停，先到先停</div>
+  <div class="step"><b>5</b>抓到的数据在「下载」文件夹（或你自己选的位置）里：jobs.csv 给 Excel 看，jobs.json 可以直接拖给 AI 帮你分析</div>
+
+  <h2><span class="no">02</span>第一次运行：蓝色警告怎么过</h2>
+  <p>第一次双击时，Windows 可能弹蓝色警告「Windows 已保护你的电脑」。这是因为本程序没有购买数字签名，不代表有病毒。</p>
+  <div class="step"><b>1</b>在蓝色警告框里点「更多信息」</div>
+  <div class="step"><b>2</b>点「仍要运行」</div>
+  <div class="warn">如果杀毒软件提示拦截，请把整个程序文件夹加入白名单：Windows 安全中心 → 病毒和威胁防护 → 管理设置 → 排除项 → 添加排除项 → 文件夹 → 选中本程序文件夹。</div>
+
+  <h2><span class="no">03</span>数据存在哪、怎么给 AI 用</h2>
+  <p>每采集一次，会在数据位置生成一个独立文件夹，里面有：</p>
+  <div class="step"><b>jobs.json</b>拖给任意 AI（网页版对话框、客户端都行），配上这句话效果更好：<br>「这是一份 BOSS直聘职位数据，帮我分析薪资分布、高频技能要求，并指出我简历需要补的关键词」</div>
+  <div class="step"><b>jobs.csv</b>双击用 Excel 打开，不乱码</div>
+  <div class="step"><b>meta.json</b>这次采集的说明书：搜了什么、筛了什么、什么时候抓的</div>
+
+  <h2><span class="no">04</span>常见问题</h2>
+  <p><b>双击了没反应？</b> 程序全局只运行一份。如果有一份已在后台（哪怕浏览器页关了），再双击会自动打开或接管它的界面，看启动日志.txt 就知道发生了什么。</p>
+  <p><b>点开始后提示要登录？</b> 按向导走一遍就好，登录态会保存，之后不用再登。</p>
+  <p><b>提示「环境被暂时限制」？</b> 说明采集频率触发了 BOSS直聘的风控。停一小时再用，期间不要反复重试，否则限制会更久。</p>
+  <p><b>抓到的数据很少？</b> 检查关键词是否太冷门、城市是否选对；目标条数越大越慢（每页之间会随机等待，防止账号被限制）。</p>
+  <p><b>双击没反应？</b> 试试文件夹里的另一个启动入口（.bat 和 .exe 效果一样）；还不行就把文件夹换到桌面再试。</p>
+  <p><b>想换数据保存位置？</b> 首页「保存位置」点「选择文件夹」，选择会自动记住。</p>
+
+  <h2><span class="no">05</span>免责声明</h2>
+  <p>本项目仅供个人学习与求职研究使用，需遵守 BOSS直聘用户协议及相关法律法规。请勿用于商业转售、恶意爬取或任何对目标网站造成负担的用途。使用本工具产生的一切后果由使用者自行承担。</p>
+
+  <h2><span class="no">06</span>致谢</h2>
+  <p>抓取核心来自开源项目 <a href="https://github.com/eatmoreduck/boss-zhipin-scraper">eatmoreduck/boss-zhipin-scraper</a>（MIT License），本工具在其基础上提供了图形界面。</p>
+
+  <div class="foot"><span>仅供个人求职研究 · 请遵守 BOSS直聘用户协议</span><span>BOSS职位采集器</span></div>
+</div>
+</body>
+</html>
