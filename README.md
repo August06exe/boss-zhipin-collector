@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-2563EB.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/平台-Windows%2010%2F11-0078D4.svg)](#-快速开始)
-[![Status](https://img.shields.io/badge/状态-v1.2·可用-FF4D00.svg)](#-更新计划)
+[![Status](https://img.shields.io/badge/状态-v1.3·可用-FF4D00.svg)](#-更新计划)
 [![Engine](https://img.shields.io/badge/引擎-Chrome%20CDP%20旁听-111111.svg)](#-它帮你做了什么)
 
 中文 ｜ 上游引擎文档见 [docs/engine-README.md](docs/engine-README.md)
@@ -66,7 +66,7 @@
 
 **方式一：下载现成的（推荐小白）**
 
-到 [Releases](../../releases) 下载 `BOSS-Collector-v1.2.3.zip`，解压到桌面，双击「启动职位采集器」。第一次运行如果弹出蓝色警告，点「更多信息 → 仍要运行」；杀毒软件误报就把文件夹加入白名单（说明文档里有截图步骤）。
+到 [Releases](../../releases) 下载 `BOSS-Collector-v1.3.0.zip`，解压到桌面，双击「启动职位采集器」。第一次运行如果弹出蓝色警告，点「更多信息 → 仍要运行」；杀毒软件误报就把文件夹加入白名单（说明文档里有截图步骤）。
 
 **方式二：从源码跑**
 
@@ -113,7 +113,7 @@ AI Agent_上海_20260924_0258/
 - [ ] 多任务队列（一次配好几组条件排队跑）
 - [ ] macOS 版
 
-已实现：抓取进度百分比与进度条（v1.2）、瑞士极简单页界面（v1.2）、采集语义重构（v1.1）。明确不做：简历匹配打分、薪酬趋势预测这类分析功能。数据抓下来，分析交给 AI。
+明确不做：简历匹配打分、薪酬趋势预测这类分析功能。数据抓下来，分析交给 AI。
 
 ## 🤝 参与
 
